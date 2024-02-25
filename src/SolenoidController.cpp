@@ -15,44 +15,47 @@ char buf2; // シリアル受信バッファ
 // ソレノイド制御の実行
 void SolenoidController::run()
 {
-
-    serial.read(&buf2, sizeof(buf2));
+    // シリアル通信の読み取り
+    int available = serial.readable();
+    if (available > 0) {
+        serial.read(&buf2, sizeof(buf2));
+        printf("Received character: %c\n", buf2);
+        ThisThread::sleep_for(20ms);
+    }
 
     // ソレノイドの制御データを設定
     if (buf2 == 'x') // 左動作
     {
-        solenoid[0] = 0;
+        printf("Left operation\n");
+        solenoid[0] = 2;
         solenoid[1] = 1;
-        printf("左動作\n");
-        CANMessage msg2(0xf2, (const uint8_t *)solenoid, sizeof(solenoid));
-        can.write(msg2);
+        buf2 = ' ';
+        ThisThread::sleep_for(20ms);
     }
     else if (buf2 == 'v') // 右動作
     {
+        printf("Right operation\n");
         solenoid[0] = 1;
-        solenoid[1] = 0;
-        printf("右動作\n");
-        CANMessage msg2(0xf2, (const uint8_t *)solenoid, sizeof(solenoid));
-        can.write(msg2);
+        solenoid[1] = 2;
+        buf2 = ' ';
+        ThisThread::sleep_for(20ms);
     }
     else if (buf2 == 'z' || buf2 == 'Q' || buf2 == 'A') // 停止
     {
+        printf("Stop\n");
         solenoid[0] = 1;
         solenoid[1] = 1;
-        printf("停止\n");
-        CANMessage msg2(0xf2, (const uint8_t *)solenoid, sizeof(solenoid));
-        can.write(msg2);
+        buf2 = ' ';
+
     }
     else
     {
+        // 未知のコマンド
+        printf("Unknown command\n");
+        
     }
 
     // CAN メッセージを作成し送信
-    // CANMessage msg2(0xf2, (const uint8_t *)solenoid, sizeof(solenoid));
-
-    // can.write(msg2);
-    // msg2_1 = msg2;
-
-    // 20 ミリ秒待機
-    // ThisThread::sleep_for(20ms);
+    CANMessage msg2(0xf2, (const uint8_t *)solenoid, sizeof(solenoid));
+    can.write(msg2);
 }
