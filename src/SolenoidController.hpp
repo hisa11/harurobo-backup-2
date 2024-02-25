@@ -15,4 +15,4 @@ private:
     uint8_t solenoid[8] = {1, 1, 1, 1, 1, 1, 1, 1}; // ソレノイド制御用データの初期化
 };
 
-#endif
+#endif // SOLENOID_CONTROLLER_HPP
