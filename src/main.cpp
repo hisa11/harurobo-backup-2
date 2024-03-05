@@ -8,15 +8,22 @@ constexpr uint32_t can_id = 30;
 
 BufferedSerial pc{PB_6, PA_10, 2600000};
 CAN can{PA_11, PA_12, (int)1e6};
+// CAN can1{PA_12, PA_13, (int)1e6};
 CANMessage msg;
 Timer timer;
 FirstPenguin penguin{can_id, can};
 
+DigitalIn button1(PC_13);
+DigitalIn button2(PC_12);
+
 int suuti = 0;
 int gohan = 0;
-
+int tamagokoppepan = 0;
+int cylinder3_time = 0;
 int main()
 {
+    button1.mode(PullUp);
+    button2.mode(PullUp);
     timer.start();
     SolenoidController solenoidController(can, pc);
     ServoController servoController(can, pc);
@@ -53,21 +60,56 @@ int main()
         pc.write(&buf, sizeof(buf));
         switch (buf)
         {
-        case 'D':
-            penguin.pwm[0] = 7000;
+         case 'D':
+            penguin.pwm[0] = 10000;
+            penguin.pwm[1] = 0;
+            penguin.pwm[2] = 0;
             break;
         case 'd':
-            penguin.pwm[0] = -7000;
+            penguin.pwm[0] = -10000;
+            penguin.pwm[1] = 0;
+            penguin.pwm[2] = 0;
             break;
-        case 'k':
-            penguin.pwm[1] = 7000;
+        case 'f':
+            penguin.pwm[0] = 0;
+            penguin.pwm[1] = 0;
+            penguin.pwm[2] = 5000;
+            break;
+        case 'g':
+            penguin.pwm[0] = 0;
+            penguin.pwm[1] = 0;
+            penguin.pwm[2] = -50000;
+            break;
+        case 'i':
+        if(button1 == 1){
+            penguin.pwm[1] = 3000;
+            penguin.pwm[0] = 0;
+            penguin.pwm[2] = 0;
+        }
+        else{
+            penguin.pwm[1] = 0;
+            penguin.pwm[0] = 0;
+            penguin.pwm[2] = 0;
+        }
             break;
         case 'y':
-            penguin.pwm[1] = -7000;
+        if (button2 == 1)
+        {
+            penguin.pwm[1] = -3000;
+            penguin.pwm[0] = 0;
+            penguin.pwm[2] = 0;
+        }
+        else{
+            penguin.pwm[0] = 0;
+            penguin.pwm[1] = 0;
+            penguin.pwm[2] = 0;
+        }
             break;
+        
         default:
             penguin.pwm[0] = 0;
             penguin.pwm[1] = 0;
+            penguin.pwm[2] = 0;
             break;
         }
         switch (buf)
@@ -143,12 +185,17 @@ int main()
             break;
         }
 
-        penguin.send();
         // Calculate motor PWM values
-        pwm0[0] = static_cast<int16_t>(((number_r - number_R) * 90 + number_L * 90));
-        pwm0[1] = static_cast<int16_t>(((number_r + number_R) * 90 - number_L * 90));
-        pwm0[2] = static_cast<int16_t>(-((number_r + number_R) * 90 + number_L * 90));
-        pwm0[3] = static_cast<int16_t>(-((number_r - number_R) * 90 - number_L * 90));
+            penguin.send();
+            penguin.pwm[0] = 0;
+            penguin.pwm[1] = 0;
+            penguin.pwm[2] = 0;
+
+        
+        pwm0[0] = static_cast<int16_t>(((number_r - number_R) * 90 - number_L * 30));
+        pwm0[1] = static_cast<int16_t>(((number_r + number_R) * 90 - number_L * 30));
+        pwm0[2] = static_cast<int16_t>(-((number_r + number_R) * 90 + number_L * 30));
+        pwm0[3] = static_cast<int16_t>(-((number_r - number_R) * 90 + number_L * 30));
 
         // Process motor speed control
         // Send motor PWM values via CAN
