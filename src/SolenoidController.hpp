@@ -3,9 +3,11 @@
 
 #include "mbed.h"
 
+extern int cylinder3_time;
+
 class SolenoidController {
 public:
-    SolenoidController(CAN& can, BufferedSerial& serial);
+    SolenoidController(CAN& can, BufferedSerial& serial); 
 
     void run();
 
