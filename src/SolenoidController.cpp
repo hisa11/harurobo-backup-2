@@ -16,46 +16,95 @@ char buf2; // シリアル受信バッファ
 void SolenoidController::run()
 {
     // シリアル通信の読み取り
-    int available = serial.readable();
+    int available = serial.readable();{
     if (available > 0) {
         serial.read(&buf2, sizeof(buf2));
         printf("Received character: %c\n", buf2);
-        ThisThread::sleep_for(20ms);
+        ThisThread::sleep_for(2ms);
     }
 
     // ソレノイドの制御データを設定
-    if (buf2 == 'x') // 左動作
+    if (buf2 == 'W') // 前　下げ
     {
-        printf("Left operation\n");
-        solenoid[0] = 2;
-        solenoid[1] = 1;
-        buf2 = ' ';
-        ThisThread::sleep_for(20ms);
-    }
-    else if (buf2 == 'v') // 右動作
-    {
-        printf("Right operation\n");
+        printf("前下げ\n");
         solenoid[0] = 1;
+        // solenoid[1] = 1;
+        buf2 = ' ';
+        ThisThread::sleep_for(2ms);
+    }
+    else if (buf2 == 'A') // 真ん中　下げ
+    {
+        printf("真ん中下げ\n");
         solenoid[1] = 2;
         buf2 = ' ';
-        ThisThread::sleep_for(20ms);
+        ThisThread::sleep_for(2ms);
     }
-    else if (buf2 == 'z' || buf2 == 'Q' || buf2 == 'A') // 停止
+    else if(buf2 == 'S') //後ろ下げ
     {
-        printf("Stop\n");
-        solenoid[0] = 1;
-        solenoid[1] = 1;
-        buf2 = ' ';
+        printf("後ろ下げ\n");
 
+        solenoid[2] = 2;
+        buf2 = ' ';
+        ThisThread::sleep_for(2ms);
     }
+    else if (buf2 == 'w') // 前上げ
+    {
+        printf("前上げ\n");
+        solenoid[0] =2 ;
+        // solenoid[1] = 1;
+        buf2 = ' ';
+        ThisThread::sleep_for(2ms);
+    }
+    else if (buf2 == 'a') // 真ん中上げ
+    {
+        printf("真ん中上げ\n");
+        // solenoid[0] = 1;
+        solenoid[1] =1 ;
+        buf2 = ' ';
+        ThisThread::sleep_for(2ms);
+    }
+    else if(buf2 == 's') //後ろ上げ
+    {
+        printf("後ろ上げ\n");
+        solenoid[2] = 1;
+        buf2 = ' ';
+        ThisThread::sleep_for(2ms);
+    }
+    
+    else if(buf2 == 'r') //後ろ上げ
+    {
+        printf("後ろ上げ\n");
+        solenoid[0] = 2;
+        solenoid[2] = 1;
+        solenoid[1] = 1;
+
+        buf2 = ' ';
+        ThisThread::sleep_for(2ms);
+    }
+    else if(buf2 == 'l') //後ろ上げ
+    {
+        printf("後ろ上げ\n");
+        solenoid[0] = 1;
+        solenoid[2] = 2;
+        solenoid[1] = 2;
+
+
+        buf2 = ' ';
+        ThisThread::sleep_for(2ms);
+    }
+    // else if(buf2 == 'w')
     else
     {
         // 未知のコマンド
-        printf("Unknown command\n");
+        // printf("Unknown command\n");
+        solenoid[0] = 0;
+        solenoid[1] = 0;
+        solenoid[2] = 0;
         
     }
 
     // CAN メッセージを作成し送信
     CANMessage msg2(0xf2, (const uint8_t *)solenoid, sizeof(solenoid));
     can.write(msg2);
+    }
 }
